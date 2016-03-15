@@ -33,7 +33,7 @@ public class WhoWasPlugin
 		
 		CommandSpec whoWasCmd = CommandSpec.builder()
 				.description(Text.of(""))
-				.permission("stalkerchan.command.stalk")
+				.permission("whowas.execute")
 				.arguments(GenericArguments.optional(new PlayerNameElement(Text.of("player"))))
 				.executor(new WhoWasExecutor())
 				.build();
