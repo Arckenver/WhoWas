@@ -6,8 +6,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.UUID;
 
 import org.spongepowered.api.command.CommandSource;
@@ -16,7 +16,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -55,23 +54,22 @@ public class PreviousNamesFetcher implements Runnable
 		{
 			previousNames = (new JsonParser()).parse(str).getAsJsonArray();
 		}
-		builder.append(
-			Text.of(TextColors.GOLD, "\nNames: ")
-		);
-		Iterator<JsonElement> iter = previousNames.iterator();
-		builder.append(Text.of(TextColors.YELLOW, iter.next().getAsJsonObject().get("name").getAsString()));
-		while (iter.hasNext())
+		builder.append(Text.of(TextColors.GOLD, "\nNames: "));
+		ArrayList<JsonObject> jsonObjects = new ArrayList<JsonObject>();
+		for (int i = previousNames.size() - 1; i >= 0; i--)
 		{
-			JsonObject obj = iter.next().getAsJsonObject();
-			String day = (new SimpleDateFormat("dd/MM/yyyy")).format(new Date(obj.get("changedToAt").getAsLong()));
-			builder.append(
-				Text.of(TextColors.GOLD, " changed to "),
-				Text.of(TextColors.YELLOW, obj.get("name").getAsString()),
-				Text.of(TextColors.GOLD, " ("),
-				Text.of(TextColors.RED, day),
-				Text.of(TextColors.GOLD, ")")
-			);
+			jsonObjects.add(previousNames.get(i).getAsJsonObject());
 		}
+		for (JsonObject obj : jsonObjects)
+		{
+			builder.append(Text.of(TextColors.YELLOW, "\n    " + obj.get("name").getAsString()));
+			if (obj.get("changedToAt") != null)
+			{
+				String day = (new SimpleDateFormat("d MMMM yyyy")).format(new Date(obj.get("changedToAt").getAsLong()));
+				builder.append(Text.of(TextColors.GOLD, " since ", TextColors.YELLOW, day));
+			}
+		}
+		builder.append(Text.of(TextColors.GOLD, " (original)"));
 		
 		src.sendMessage(builder.build());
 	}
