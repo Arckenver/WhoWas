@@ -12,7 +12,7 @@ import org.spongepowered.api.text.Text;
 
 import com.google.inject.Inject;
 
-@Plugin(id = "com.arckenver.whowas", name = "WhoWas", version = "1.1", description="A plugin to get a player's previous names.")
+@Plugin(id = "com.arckenver.whowas", name = "WhoWas", version = "1.2", description="A plugin to get a player's previous names.")
 public class WhoWasPlugin
 {
 	private Task.Builder taskBuilder;
