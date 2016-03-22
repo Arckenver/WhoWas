@@ -1,7 +1,5 @@
 package com.arckenver.whowas;
 
-import java.util.UUID;
-
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -20,21 +18,10 @@ public class WhoWasExecutor implements CommandExecutor
 			return CommandResult.success();
 		}
 		String name = ctx.<String>getOne("player").get();
-		UUID uuid;
-		try
-		{
-			uuid = WhoWasPlugin.getGame().getServer().getGameProfileManager().get(name).get().getUniqueId();
-		}
-		catch (Exception e)
-		{
-			src.sendMessage(Text.of(TextColors.RED, "Invalid player name"));
-			return CommandResult.success();
-		}
-		
 		WhoWasPlugin
 		.getTaskBuilder()
 		.name("StalkerChan Task - Stalking " + name + " for " + src.getName())
-		.execute(new PreviousNamesFetcher(uuid, name, src))
+		.execute(new PreviousNamesFetcher(name, src))
 		.async()
 		.submit(WhoWasPlugin.getInstance());
 		

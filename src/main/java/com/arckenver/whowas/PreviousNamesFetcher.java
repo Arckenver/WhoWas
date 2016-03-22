@@ -25,15 +25,29 @@ public class PreviousNamesFetcher implements Runnable
 	private String name;
 	private CommandSource src;
 	
-	public PreviousNamesFetcher(UUID uuid, String name, CommandSource src)
+	public PreviousNamesFetcher(String name, CommandSource src)
 	{
-		this.uuid = uuid;
+		this.uuid = null;
 		this.name = name;
 		this.src = src;
 	}
 	
 	public void run()
 	{
+		try
+		{
+			uuid = WhoWasPlugin.getGame().getServer().getGameProfileManager().get(name).get().getUniqueId();
+		}
+		catch (Exception e)
+		{
+			uuid = getUUID(name);
+		}
+		if (uuid == null)
+		{
+			src.sendMessage(Text.of(TextColors.RED, "Invalid player name"));
+			return;
+		}
+		
 		Builder builder = Text.builder("");
 		builder.append(
 			Text.of(TextColors.GOLD, "----------{ "),
@@ -122,5 +136,67 @@ public class PreviousNamesFetcher implements Runnable
 			}
 		}
 		return r;
+	}
+	
+	public UUID getUUID(String name)
+	{
+		String target = String.format("https://api.mojang.com/users/profiles/minecraft/", name);
+		String r = null;
+		
+		HttpURLConnection connection = null;
+		try
+		{
+			URL url = new URL(target);
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			
+			connection.setUseCaches(false);
+			connection.setDoOutput(true);
+			connection.setConnectTimeout(3000);
+			
+			connection.connect();
+			
+			if (connection.getResponseCode() != 200)
+			{
+				return null;
+			}
+			
+			InputStream is = connection.getInputStream();
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+			StringBuilder response = new StringBuilder();
+			String line;
+			while ((line = rd.readLine()) != null)
+			{
+				response.append(line);
+				response.append('\r').append('\n');
+			}
+			rd.close();
+			
+			r = response.toString();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			if (connection != null)
+			{
+				connection.disconnect();
+			}
+		}
+		WhoWasPlugin.getLogger().info(r);
+		try
+		{
+			JsonObject obj = new JsonParser().parse(r).getAsJsonObject();
+			UUID uuid =  UUID.fromString(obj.get("id").getAsString().replaceFirst(
+					"([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)", "$1-$2-$3-$4-$5"));
+			return uuid;
+		}
+		catch (Exception e)
+		{
+			
+		}
+		return null;
 	}
 }

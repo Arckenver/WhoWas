@@ -3,6 +3,8 @@ package com.arckenver.whowas;
 import java.util.stream.Collectors;
 
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.ArgumentParseException;
+import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.PatternMatchingCommandElement;
 import org.spongepowered.api.text.Text;
 
@@ -11,6 +13,12 @@ public class PlayerNameElement extends PatternMatchingCommandElement
 	public PlayerNameElement(Text key)
 	{
 		super(key);
+	}
+	
+	@Override
+	protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException
+	{
+		return args.next();
 	}
 	
 	@Override
@@ -36,6 +44,6 @@ public class PlayerNameElement extends PatternMatchingCommandElement
 
 	public Text getUsage(CommandSource src)
 	{
-		return Text.of("player");
+		return Text.EMPTY;
 	}
 }
